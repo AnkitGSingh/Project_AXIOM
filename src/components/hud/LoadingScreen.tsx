@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useProgress } from '@react-three/drei';
 import { useAXIOMStore, AnimationPhase } from '@/lib/store/useAXIOMStore';
 import { Howler } from 'howler';
@@ -9,14 +10,15 @@ export function LoadingScreen() {
   const phase    = useAXIOMStore((state) => state.phase);
   const setPhase = useAXIOMStore((state) => state.setPhase);
 
-  if (phase !== AnimationPhase.LOADING) return null;
-
-  const handleInitialize = () => {
-    if (Howler.ctx && Howler.ctx.state === 'suspended') {
-      Howler.ctx.resume();
+  // Auto-advance when assets finish loading — no button needed on the right panel
+  useEffect(() => {
+    if (progress >= 100 && phase === AnimationPhase.LOADING) {
+      const t = setTimeout(() => setPhase(AnimationPhase.IDLE), 600);
+      return () => clearTimeout(t);
     }
-    setPhase(AnimationPhase.IDLE);
-  };
+  }, [progress, phase, setPhase]);
+
+  if (phase !== AnimationPhase.LOADING) return null;
 
   return (
     <div
@@ -50,34 +52,9 @@ export function LoadingScreen() {
           </p>
         </div>
       ) : (
-        <button
-          onClick={handleInitialize}
-          style={{
-            fontFamily: 'var(--font-orbitron), sans-serif',
-            fontSize: '2rem',
-            padding: '1.5rem 4rem',
-            letterSpacing: '0.25em',
-            textTransform: 'uppercase',
-            border: '2px solid #F6CE6E',
-            color: '#F6CE6E',
-            background: 'transparent',
-            boxShadow: '0 0 20px rgba(246,206,110,0.35)',
-            cursor: 'pointer',
-            transition: 'all 0.3s',
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = '#F6CE6E';
-            (e.currentTarget as HTMLButtonElement).style.color = '#080808';
-            (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 40px rgba(246,206,110,0.85)';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
-            (e.currentTarget as HTMLButtonElement).style.color = '#F6CE6E';
-            (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 20px rgba(246,206,110,0.35)';
-          }}
-        >
-          INITIALIZE SYSTEM
-        </button>
+        <div style={{ fontFamily: 'var(--font-orbitron), sans-serif', color: '#F6CE6E', letterSpacing: '0.2em', fontSize: '1.1rem', opacity: 0.7 }}>
+          READY
+        </div>
       )}
     </div>
   );

@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useAXIOMStore } from '@/lib/store/useAXIOMStore'
+import { useAXIOMStore, AnimationPhase } from '@/lib/store/useAXIOMStore'
 
 const CYAN = '#00F2FF'
 const GOLD = '#F6CE6E'
@@ -37,10 +37,11 @@ function TypewriterText({ text, speed = 14 }: { text: string; speed?: number }) 
 const LOCAL_COMMANDS: Record<string, string> = {
   help: [
     'AXIOM Command Registry:',
-    '  about      — Operator profile + optics zoom',
-    '  projects   — Project matrix + Arc Reactor burst',
+    '  about      — Operator profile',
+    '  projects   — Project matrix',
     '  skills     — Tech stack readout',
     '  contact    — Open communication channels',
+    '  hire him   — Deploy contact form',
     '  clear      — Purge terminal buffer',
     '  [anything] — Query AXIOM AI directly',
   ].join('\n'),
@@ -75,6 +76,13 @@ export default function Terminal() {
 
   const triggerArcReactorPulse = useAXIOMStore(s => s.triggerArcReactorPulse)
   const setCameraZoomHead = useAXIOMStore(s => s.setCameraZoomHead)
+  const setActivePanel = useAXIOMStore(s => s.setActivePanel)
+  const triggerEasterEgg = useAXIOMStore(s => s.triggerEasterEgg)
+  const systemInitialized = useAXIOMStore(s => s.systemInitialized)
+  const setSystemInitialized = useAXIOMStore(s => s.setSystemInitialized)
+  const setPhase = useAXIOMStore(s => s.setPhase)
+  const transmissionSuccess = useAXIOMStore(s => s.transmissionSuccess)
+  const setTransmissionSuccess = useAXIOMStore(s => s.setTransmissionSuccess)
 
   // Scroll to bottom on new message
   useEffect(() => {
@@ -87,6 +95,13 @@ export default function Terminal() {
       { id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, kind, text },
     ])
   }, [])
+
+  // Log "TRANSMISSION SUCCESSFUL" when the contact form completes
+  useEffect(() => {
+    if (!transmissionSuccess) return
+    addMsg('response', 'TRANSMISSION SUCCESSFUL. AXIOM OUT.')
+    setTransmissionSuccess(false)
+  }, [transmissionSuccess, addMsg, setTransmissionSuccess])
 
   const handleSubmit = useCallback(async () => {
     const raw = input.trim()
@@ -105,34 +120,107 @@ export default function Terminal() {
       return
     }
 
-    // ── projects — Arc Reactor pulse ───────────────────────────────────────
+    // ── project number shortcuts 00-06 ────────────────────────────────────
+    const PROJECT_EXPAND: Record<string, string> = {
+      '00': 'Tell me about the Omnipotent App flagship project in detail.',
+      '01': 'Tell me about the First Aid Buddy Bot project in detail.',
+      '02': 'Tell me about the Maze Runner Robot project in detail.',
+      '03': 'Tell me about the Digit Recognition project in detail.',
+      '04': 'Tell me about the IPL Score Scraper project in detail.',
+      '05': 'Tell me about the GODL1KE project in detail.',
+      '06': 'Tell me about the ML Medical Imaging project in detail.',
+    }
+    if (PROJECT_EXPAND[cmd]) {
+      if (!systemInitialized) {
+        addMsg('error', 'AXIOM: Core offline — initialize the system before querying the neural link.')
+        return
+      }
+      setIsLoading(true)
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: [{ role: 'user', content: PROJECT_EXPAND[cmd] }] }),
+        })
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const data = await res.json()
+        addMsg('response', data.text ?? 'AXIOM: Signal ambiguous. Please rephrase your query.')
+      } catch {
+        addMsg('error', 'AXIOM: Neural link degraded. Ensure AWS credentials are configured.')
+      } finally {
+        setIsLoading(false)
+      }
+      return
+    }
+
+    // ── projects — print list inline + open panel ─────────────────────────
     if (cmd === 'projects') {
       triggerArcReactorPulse()
+      setActivePanel('projects')
       addMsg(
         'response',
-        'AXIOM: Project matrix coming online — Arc Reactor output at 3000%. Three deployments active. Ask me about any project by name, or query the full stack.',
+        'AXIOM: Project Matrix — 7 active deployments:\n\n' +
+        '  00. Omnipotent App          — Flagship · Automation Hub · Systems of Systems\n' +
+        '  01. First Aid Buddy Bot    — RAG · Python · Claude API\n' +
+        '  02. Maze Runner Robot      — Webots · BFS/DFS · Sensor Fusion\n' +
+        '  03. Digit Recognition      — TensorFlow · CNN · MNIST\n' +
+        '  04. IPL Score Scraper      — BeautifulSoup · Pandas · Matplotlib\n' +
+        '  05. GODL1KE                — Search AI · Vanilla JS · SHU API\n' +
+        '  06. ML Medical Imaging     — Deep Learning · CNN · 79% accuracy\n\n' +
+        'Which one should I expand for you?',
       )
       return
     }
 
-    // ── about — Camera zoom to head ────────────────────────────────────────
+    // ── about — Camera zoom to head + open panel ───────────────────────────
     if (cmd === 'about') {
       setCameraZoomHead(true)
+      setActivePanel('about')
       addMsg(
         'response',
-        'AXIOM: Loading operator profile. Ankit Singh — MSc Artificial Intelligence, Automation Engineer at AdTecher, Sheffield. Specialist in AI-powered ad spend protection. Optical sensors redirecting to primary contact point.',
+        'AXIOM: Loading operator profile. Optical sensors redirecting. Panel deployed.',
       )
       setTimeout(() => setCameraZoomHead(false), 8000)
       return
     }
 
-    // ── local commands ─────────────────────────────────────────────────────
+    // ── skills — open panel ────────────────────────────────────────────────
+    if (cmd === 'skills') {
+      setActivePanel('skills')
+      addMsg('response', LOCAL_COMMANDS['skills'])
+      return
+    }
+
+    // ── contact — open panel ───────────────────────────────────────────────
+    if (cmd === 'contact') {
+      setActivePanel('contact')
+      addMsg('response', LOCAL_COMMANDS['contact'])
+      return
+    }
+    // ── hire him — open contact panel ─────────────────────────────────────────
+    if (cmd === 'hire him') {
+      setActivePanel('contact')
+      addMsg('response', 'AXIOM: Smart move. Opening secure transmission channel — make it count.')
+      return
+    }
+    // ── axiom — hidden easter egg ──────────────────────────────────────────
+    if (cmd === 'axiom') {
+      triggerEasterEgg()
+      addMsg('response', 'AXIOM: ██████ CLASSIFIED SEQUENCE ACTIVATED ██████')
+      return
+    }
+
+    // ── remaining local commands (help, etc.) ─────────────────────────────
     if (LOCAL_COMMANDS[cmd]) {
       addMsg('response', LOCAL_COMMANDS[cmd])
       return
     }
 
     // ── AI fallback — AWS Bedrock ──────────────────────────────────────────
+    if (!systemInitialized) {
+      addMsg('error', 'AXIOM: Core offline — initialize the system before querying the neural link.')
+      return
+    }
     setIsLoading(true)
     try {
       const res = await fetch('/api/chat', {
@@ -148,7 +236,7 @@ export default function Terminal() {
     } finally {
       setIsLoading(false)
     }
-  }, [input, isLoading, addMsg, triggerArcReactorPulse, setCameraZoomHead])
+  }, [input, isLoading, addMsg, triggerArcReactorPulse, setCameraZoomHead, setActivePanel, triggerEasterEgg, systemInitialized])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -190,7 +278,7 @@ export default function Terminal() {
         WebkitBackdropFilter: 'blur(16px)',
         cursor: 'text',
       }}
-      onClick={() => inputRef.current?.focus()}
+      onClick={() => { if (systemInitialized) inputRef.current?.focus() }}
     >
       {/* ── Message list ─────────────────────────────────────────────────── */}
       <div
@@ -234,12 +322,57 @@ export default function Terminal() {
 
         {isLoading && (
           <div
-            style={{ color: CYAN, fontSize: 'clamp(0.75rem, 1.3vw, 1rem)' }}
+            style={{ color: CYAN, fontSize: 'clamp(0.75rem, 1.3vw, 1rem)', opacity: 0.8 }}
           >
-            {'AXIOM: '}
             <span style={{ animation: 'termBlink 0.7s step-end infinite' }}>
-              ▋▋▋
+              AXIOM IS THINKING...
             </span>
+          </div>
+        )}
+
+        {/* ── Initialize System button \u2014 shown until system is activated \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */}
+        {!systemInitialized && (
+          <div style={{ margin: '14px 0 6px' }}>
+            <button
+              onClick={() => {
+                // Resume audio context (required for browsers that block autoplay)
+                try {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  const Howler = (window as any).Howler
+                  if (Howler?.ctx?.state === 'suspended') Howler.ctx.resume()
+                } catch { /* audio not critical */ }
+                setPhase(AnimationPhase.IDLE)
+                setSystemInitialized(true)
+                addMsg('system', 'AXIOM CORE ONLINE. Neural link established. All systems operational. Query away.')
+              }}
+              style={{
+                background: 'transparent',
+                border: '1px solid rgba(0,242,255,0.45)',
+                color: CYAN,
+                fontFamily: 'var(--font-orbitron), sans-serif',
+                fontSize: 'clamp(0.62rem, 1.1vw, 0.78rem)',
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase',
+                padding: '10px 22px',
+                cursor: 'pointer',
+                boxShadow: '0 0 18px rgba(0,242,255,0.15), inset 0 0 12px rgba(0,242,255,0.06)',
+                transition: 'box-shadow 0.2s, border-color 0.2s',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 10,
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 32px rgba(0,242,255,0.35), inset 0 0 20px rgba(0,242,255,0.12)'
+                ;(e.currentTarget as HTMLButtonElement).style.borderColor = CYAN
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 18px rgba(0,242,255,0.15), inset 0 0 12px rgba(0,242,255,0.06)'
+                ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(0,242,255,0.45)'
+              }}
+            >
+              <span style={{ opacity: 0.6 }}>▶</span>
+              {' '}INITIALIZE SYSTEM
+            </button>
           </div>
         )}
 
@@ -299,7 +432,8 @@ export default function Terminal() {
               style={{
                 color: GOLD,
                 fontSize: 'clamp(0.8rem, 1.4vw, 1.05rem)',
-                animation: 'termCursorBlink 1s step-end infinite',
+                animation: systemInitialized ? 'termCursorBlink 1s step-end infinite' : 'none',
+                opacity: systemInitialized ? 1 : 0.2,
                 lineHeight: 1,
                 pointerEvents: 'none',
                 userSelect: 'none',
@@ -329,8 +463,8 @@ export default function Terminal() {
                 color: 'transparent',
                 caretColor: 'transparent',
               }}
-              autoFocus
-              disabled={isLoading}
+              autoFocus={false}
+              disabled={!systemInitialized || isLoading}
               spellCheck={false}
               autoComplete="off"
               autoCorrect="off"

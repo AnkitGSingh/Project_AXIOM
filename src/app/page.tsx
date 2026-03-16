@@ -4,6 +4,8 @@ import dynamic from 'next/dynamic'
 import { useEffect, useState } from 'react'
 import BootScreen from '@/components/hud/BootScreen'
 import Terminal from '@/components/hud/Terminal'
+import { SectionOverlay } from '@/components/hud/SectionOverlay'
+import { EasterEggOverlay } from '@/components/hud/EasterEggOverlay'
 
 // 3D scene loaded dynamically — no SSR
 const AXIOMScene = dynamic(() => import('@/components/3d/AXIOMScene'), { ssr: false })
@@ -36,6 +38,12 @@ export default function Home() {
     >
       {/* Boot sequence — renders over everything, fades out when done */}
       {!bootComplete && <BootScreen onComplete={() => setBootComplete(true)} />}
+
+      {/* Section info overlay — slides in from right on terminal commands */}
+      <SectionOverlay />
+
+      {/* Easter egg overlay — triggered by typing 'axiom' */}
+      <EasterEggOverlay />
 
       <div className="axiom-grid-board" />
       <div className="axiom-grid-flow" />

@@ -21,6 +21,9 @@ interface AXIOMState {
   easterEggActive: boolean;
   arcReactorPulse: boolean;
   cameraZoomHead: boolean;
+  activePanel: 'projects' | 'about' | 'skills' | 'contact' | null;
+  systemInitialized: boolean;
+  transmissionSuccess: boolean;
 
   setPhase: (phase: AnimationPhase) => void;
   selectProject: (id: string, target?: Vector3) => void;
@@ -31,6 +34,9 @@ interface AXIOMState {
   triggerEasterEgg: () => void;
   triggerArcReactorPulse: () => void;
   setCameraZoomHead: (val: boolean) => void;
+  setActivePanel: (panel: 'projects' | 'about' | 'skills' | 'contact' | null) => void;
+  setSystemInitialized: (val: boolean) => void;
+  setTransmissionSuccess: (val: boolean) => void;
 }
 
 export const useAXIOMStore = create<AXIOMState>((set) => ({
@@ -43,6 +49,9 @@ export const useAXIOMStore = create<AXIOMState>((set) => ({
   easterEggActive: false,
   arcReactorPulse: false,
   cameraZoomHead: false,
+  activePanel: null,
+  systemInitialized: false,
+  transmissionSuccess: false,
 
   setPhase: (phase) => set({ phase }),
   
@@ -80,4 +89,10 @@ export const useAXIOMStore = create<AXIOMState>((set) => ({
   },
 
   setCameraZoomHead: (val) => set({ cameraZoomHead: val }),
+
+  setActivePanel: (panel) => set({ activePanel: panel }),
+
+  setSystemInitialized: (val) => set({ systemInitialized: val }),
+
+  setTransmissionSuccess: (val) => set({ transmissionSuccess: val }),
 }));

@@ -1,8 +1,10 @@
 'use client';
 import { useState } from 'react';
+import { useAXIOMStore } from '@/lib/store/useAXIOMStore';
 
 export function Contact() {
   const [formStatus, setFormStatus] = useState<'IDLE' | 'SUBMITTING' | 'SUCCESS' | 'ERROR'>('IDLE');
+  const setTransmissionSuccess = useAXIOMStore(s => s.setTransmissionSuccess);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -33,71 +35,105 @@ export function Contact() {
 
       if (res.status === 200) {
         setFormStatus('SUCCESS');
+        setTransmissionSuccess(true);
         setName(''); setEmail(''); setMessage('');
       } else {
         setFormStatus('ERROR');
       }
-    } catch (err) {
+    } catch {
       setFormStatus('ERROR');
     }
   };
 
   return (
-    <section id="contact" className="min-h-[80vh] relative z-10 bg-[#080808] text-white flex items-center justify-center p-8 border-t border-[#C9A84C]/20 border-b-8 border-b-[#C9A84C]">
-      <div className="max-w-2xl w-full">
-        <h2 className="text-4xl md:text-5xl font-orbitron font-bold text-[#C9A84C] mb-8 tracking-wider text-center">
-          INITIATE_COMMS
-        </h2>
-        
-        <div className="bg-[#00141e] border border-[#C9A84C]/50 p-8 relative flex flex-col gap-6 font-rajdhani text-lg">
-          <div className="flex flex-col gap-2">
-            <label htmlFor="name" className="text-[#4FC3F7] font-orbitron text-xs tracking-widest uppercase">Operator Name</label>
-            <input 
+    <div style={{ padding: '2rem 2rem 3rem' }}>
+
+      <h2 style={{
+        fontFamily: 'var(--font-orbitron)',
+        color: '#F6CE6E',
+        fontSize: 'clamp(1.1rem, 2vw, 1.6rem)',
+        marginBottom: '2rem',
+        letterSpacing: '0.12em',
+        textTransform: 'uppercase',
+      }}>
+        &gt; INITIATE_COMMS
+      </h2>
+
+      <div style={{
+        background: '#00141e',
+        border: '1px solid rgba(246,206,110,0.25)',
+        padding: '1.75rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1.25rem',
+      }}>
+        {[{ id: 'name', label: 'Operator Name', type: 'text', value: name, set: setName },
+          { id: 'email', label: 'Return Frequency (Email)', type: 'email', value: email, set: setEmail }].map(({ id, label, type, value, set }) => (
+          <div key={id} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            <label htmlFor={id} style={{ fontFamily: 'var(--font-orbitron)', fontSize: '0.58rem', color: '#00F2FF', letterSpacing: '0.14em', textTransform: 'uppercase' }}>{label}</label>
+            <input
               required
-              type="text" 
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="bg-black border border-gray-700 p-3 text-white focus:outline-none focus:border-[#C9A84C] transition-colors"
+              type={type}
+              id={id}
+              value={value}
+              onChange={(e) => set(e.target.value)}
+              style={{
+                background: 'rgba(0,0,0,0.6)',
+                border: '1px solid #374151',
+                color: '#fff',
+                padding: '0.6rem 0.85rem',
+                fontFamily: 'var(--font-rajdhani)',
+                fontSize: '1rem',
+                outline: 'none',
+              }}
             />
           </div>
+        ))}
 
-          <div className="flex flex-col gap-2">
-            <label htmlFor="email" className="text-[#4FC3F7] font-orbitron text-xs tracking-widest uppercase">Return Frequency (Email)</label>
-            <input 
-              required
-              type="email" 
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="bg-black border border-gray-700 p-3 text-white focus:outline-none focus:border-[#C9A84C] transition-colors"
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label htmlFor="message" className="text-[#4FC3F7] font-orbitron text-xs tracking-widest uppercase">Encrypted Transmission</label>
-            <textarea 
-              required
-              id="message"
-              rows={5}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="bg-black border border-gray-700 p-3 text-white focus:outline-none focus:border-[#C9A84C] transition-colors resize-none"
-            ></textarea>
-          </div>
-
-          <button 
-            onClick={handleSubmit}
-            disabled={formStatus === 'SUBMITTING' || formStatus === 'SUCCESS'}
-            className="mt-4 bg-[#C9A84C] text-[#080808] font-orbitron font-bold p-4 hover:bg-white transition-colors uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {formStatus === 'IDLE' && 'Transmit Message'}
-            {formStatus === 'SUBMITTING' && 'Encrypting...'}
-            {formStatus === 'SUCCESS' && 'Transmission Secure'}
-            {formStatus === 'ERROR' && 'Transmission Failed - Retry'}
-          </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+          <label htmlFor="message" style={{ fontFamily: 'var(--font-orbitron)', fontSize: '0.58rem', color: '#00F2FF', letterSpacing: '0.14em', textTransform: 'uppercase' }}>Encrypted Transmission</label>
+          <textarea
+            required
+            id="message"
+            rows={4}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            style={{
+              background: 'rgba(0,0,0,0.6)',
+              border: '1px solid #374151',
+              color: '#fff',
+              padding: '0.6rem 0.85rem',
+              fontFamily: 'var(--font-rajdhani)',
+              fontSize: '1rem',
+              outline: 'none',
+              resize: 'none',
+            }}
+          />
         </div>
+
+        <button
+          onClick={handleSubmit}
+          disabled={formStatus === 'SUBMITTING' || formStatus === 'SUCCESS'}
+          style={{
+            background: formStatus === 'SUCCESS' ? 'rgba(34,197,94,0.15)' : 'transparent',
+            border: `1px solid ${formStatus === 'SUCCESS' ? '#22c55e' : '#F6CE6E'}`,
+            color: formStatus === 'SUCCESS' ? '#22c55e' : '#F6CE6E',
+            fontFamily: 'var(--font-orbitron)',
+            fontSize: '0.7rem',
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            padding: '0.85rem',
+            cursor: formStatus === 'SUBMITTING' || formStatus === 'SUCCESS' ? 'not-allowed' : 'pointer',
+            opacity: formStatus === 'SUBMITTING' ? 0.5 : 1,
+            marginTop: '0.25rem',
+          }}
+        >
+          {formStatus === 'IDLE' && 'Transmit Message'}
+          {formStatus === 'SUBMITTING' && 'Encrypting...'}
+          {formStatus === 'SUCCESS' && '✓ Transmission Secure'}
+          {formStatus === 'ERROR' && 'Transmission Failed — Retry'}
+        </button>
       </div>
-    </section>
+    </div>
   );
 }
