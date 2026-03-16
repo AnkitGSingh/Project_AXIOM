@@ -210,7 +210,7 @@ export function HUDIntro({ visible }: HUDIntroProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6 }}
-            onClick={() => console.log('ACCESS SYSTEMS clicked')}
+            onClick={() => {}}
             style={{
               fontFamily: 'var(--font-jetbrains)',
               fontSize: '0.8rem',
