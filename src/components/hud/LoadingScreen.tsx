@@ -20,23 +20,32 @@ export function LoadingScreen() {
 
   return (
     <div
-      className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#080808] w-full h-full"
+      className="absolute inset-0 z-50 flex flex-col items-center justify-center w-full h-full"
+      style={{
+        animation: 'fadeIn 700ms ease-out',
+        background: 'linear-gradient(180deg, rgba(8, 8, 8, 0.36), rgba(8, 8, 8, 0.18))',
+        backdropFilter: 'blur(1.5px)',
+      }}
     >
       {progress < 100 ? (
         <div className="flex flex-col items-center gap-4">
           <h1
-            style={{ fontFamily: 'var(--font-orbitron), sans-serif', color: '#C9A84C', letterSpacing: '0.3em' }}
+            style={{ fontFamily: 'var(--font-orbitron), sans-serif', color: '#F6CE6E', letterSpacing: '0.3em' }}
             className="text-4xl md:text-6xl font-bold"
           >
             AXIOM
           </h1>
-          <div className="w-64 h-1 bg-gray-900 rounded overflow-hidden">
+          <div className="w-64 h-1 rounded overflow-hidden" style={{ background: 'rgba(186, 143, 54, 0.22)' }}>
             <div
-              className="h-full bg-[#C9A84C] transition-all duration-300"
-              style={{ width: `${progress}%` }}
+              className="h-full transition-all duration-300"
+              style={{
+                background: 'linear-gradient(90deg, #BA8F36, #F6CE6E)',
+                boxShadow: '0 0 18px rgba(246,206,110,0.55)',
+                width: `${progress}%`,
+              }}
             />
           </div>
-          <p style={{ fontFamily: 'var(--font-rajdhani), sans-serif', color: '#C9A84C' }}>
+          <p style={{ fontFamily: 'var(--font-rajdhani), sans-serif', color: '#E2E8F0' }}>
             {Math.round(progress)}%
           </p>
         </div>
@@ -49,22 +58,22 @@ export function LoadingScreen() {
             padding: '1.5rem 4rem',
             letterSpacing: '0.25em',
             textTransform: 'uppercase',
-            border: '2px solid #C9A84C',
-            color: '#C9A84C',
+            border: '2px solid #F6CE6E',
+            color: '#F6CE6E',
             background: 'transparent',
-            boxShadow: '0 0 20px rgba(201,168,76,0.5)',
+            boxShadow: '0 0 20px rgba(246,206,110,0.35)',
             cursor: 'pointer',
             transition: 'all 0.3s',
           }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = '#C9A84C';
+            (e.currentTarget as HTMLButtonElement).style.background = '#F6CE6E';
             (e.currentTarget as HTMLButtonElement).style.color = '#080808';
-            (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 40px rgba(201,168,76,0.9)';
+            (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 40px rgba(246,206,110,0.85)';
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
-            (e.currentTarget as HTMLButtonElement).style.color = '#C9A84C';
-            (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 20px rgba(201,168,76,0.5)';
+            (e.currentTarget as HTMLButtonElement).style.color = '#F6CE6E';
+            (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 20px rgba(246,206,110,0.35)';
           }}
         >
           INITIALIZE SYSTEM

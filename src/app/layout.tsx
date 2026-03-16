@@ -44,7 +44,7 @@ export default function RootLayout({
       <head>
         <meta name="theme-color" content="#C9A84C" />
       </head>
-      <body suppressHydrationWarning className={`${orbitron.variable} ${rajdhani.variable} ${jetbrainsMono.variable} antialiased bg-[#080808]`} style={{ background: '#080808', color: '#fff' }}>
+      <body suppressHydrationWarning className={`${orbitron.variable} ${rajdhani.variable} ${jetbrainsMono.variable} antialiased`} style={{ background: '#020617', color: '#fff' }}>
         {children}
       </body>
     </html>

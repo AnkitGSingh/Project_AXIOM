@@ -58,6 +58,7 @@ export default function ParticleGrid() {
         map:          makeSprite(r, g, b),
         vertexColors: true,   // per-particle brightness via color buffer
         transparent:  true,
+        // Keep base opacity at 1; effective opacity is controlled by animated RGB intensity.
         opacity:      1,
         depthWrite:   false,
         blending:     THREE.AdditiveBlending,
@@ -70,14 +71,14 @@ export default function ParticleGrid() {
       goldPhases: gold.phases, goldSpeeds: gold.speeds,
       blueGeo:  blue.geo, bluePos:  blue.pos, blueCol:  blue.col,
       bluePhases: blue.phases, blueSpeeds: blue.speeds,
-      goldMat: makeMat(201, 168,  76, 0.18),  // #C9A84C — larger foreground gold
-      blueMat: makeMat( 79, 195, 247, 0.10),  // #4FC3F7 — smaller accent blue
+      goldMat: makeMat(246, 206, 110, 0.2),   // #F6CE6E — foreground signal particles
+      blueMat: makeMat(186, 143, 54, 0.1),    // amber secondary data particles
     }
   }, [])
 
   // Pre-compute base colours once
-  const GOLD = useMemo(() => new THREE.Color('#C9A84C'), [])
-  const BLUE = useMemo(() => new THREE.Color('#4FC3F7'), [])
+  const GOLD = useMemo(() => new THREE.Color('#F6CE6E'), [])
+  const BLUE = useMemo(() => new THREE.Color('#BA8F36'), [])
 
   useFrame((state) => {
     const t = state.clock.elapsedTime

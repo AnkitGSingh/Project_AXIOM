@@ -19,6 +19,8 @@ interface AXIOMState {
   cameraTarget: Vector3 | null;
   isCardVisible: boolean;
   easterEggActive: boolean;
+  arcReactorPulse: boolean;
+  cameraZoomHead: boolean;
 
   setPhase: (phase: AnimationPhase) => void;
   selectProject: (id: string, target?: Vector3) => void;
@@ -27,6 +29,8 @@ interface AXIOMState {
   setHoveredPart: (part: string | null) => void;
   setCameraTarget: (pos: Vector3 | null) => void;
   triggerEasterEgg: () => void;
+  triggerArcReactorPulse: () => void;
+  setCameraZoomHead: (val: boolean) => void;
 }
 
 export const useAXIOMStore = create<AXIOMState>((set) => ({
@@ -37,6 +41,8 @@ export const useAXIOMStore = create<AXIOMState>((set) => ({
   cameraTarget: null,
   isCardVisible: false,
   easterEggActive: false,
+  arcReactorPulse: false,
+  cameraZoomHead: false,
 
   setPhase: (phase) => set({ phase }),
   
@@ -66,5 +72,12 @@ export const useAXIOMStore = create<AXIOMState>((set) => ({
     setTimeout(() => {
       set({ easterEggActive: false });
     }, 4000);
-  }
+  },
+
+  triggerArcReactorPulse: () => {
+    set({ arcReactorPulse: true });
+    setTimeout(() => set({ arcReactorPulse: false }), 3000);
+  },
+
+  setCameraZoomHead: (val) => set({ cameraZoomHead: val }),
 }));
